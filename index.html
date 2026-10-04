@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>國文課 數位教學 ft. AI 工具 ｜ 正興國中到校諮詢</title>
+  
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#294A6E',
+              navyDark: '#172E47',
+              navyLight: '#3B6491',
+              orange: '#C56C2B',
+              orangeDark: '#9C5019',
+              orangeLight: '#DF803A',
+              bg: '#F8F9FA',
+              cardBg: '#FFFFFF',
+              border: '#E2E8F0',
+              dark: '#0F172A',
+              slate: '#334155',
+              muted: '#64748B',
+              gold: '#F59E0B'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans TC"', '"Microsoft JhengHei"', 'system-ui', 'sans-serif'],
+            serif: ['"Noto Serif TC"', '"Microsoft JhengHei"', 'serif'],
+          },
+          boxShadow: {
+            'card': '0 8px 30px -4px rgba(41, 74, 110, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 16px 40px -6px rgba(41, 74, 110, 0.16), 0 6px 16px -3px rgba(0, 0, 0, 0.06)',
+            'floating': '0 20px 35px -8px rgba(0, 0, 0, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.08)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans TC', "Microsoft JhengHei", sans-serif;
+      background-color: #F8F9FA;
+      color: #0F172A;
+      overflow-x: hidden;
+    }
+
+    /* Presentation mode styles */
+    .slide-stage {
+      min-height: 560px;
+    }
+
+    @media (min-width: 1024px) {
+      .slide-stage {
+        min-height: 640px;
+      }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* Golden Circle Styles */
+    .circle-layer {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .circle-layer:hover {
+      transform: scale(1.02);
+      filter: drop-shadow(0 8px 16px rgba(41, 74, 110, 0.18));
+    }
+    .circle-layer.active {
+      transform: scale(1.04);
+      filter: drop-shadow(0 10px 24px rgba(41, 74, 110, 0.28));
+    }
+
+    /* Toast animation */
+    @keyframes slideUp {
+      from { transform: translate(-50%, 100%); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    .toast-show {
+      animation: slideUp 0.3s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-navy selection:text-white">
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-brand-border px-4 lg:px-8 py-3.5 transition-all duration-200 shadow-sm">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Left: Logo & Event Header -->
+      <div class="flex items-center space-x-3.5">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-navy to-brand-navyDark flex items-center justify-center text-white shadow-md">
+          <i data-lucide="book-open-check" class="w-6 h-6 text-amber-300"></i>
+        </div>
+        <div>
+          <div class="text-xs sm:text-sm font-bold text-brand-orange uppercase tracking-wider">20261005 到校諮詢在正興</div>
+          <h1 class="text-xl sm:text-2xl font-black text-brand-navy leading-tight">國文課 數位教學 ft. AI 工具</h1>
+        </div>
+      </div>
+
+      <!-- Right: Action Buttons -->
+      <div class="flex items-center space-x-3">
+        
+        <!-- View Mode Switch -->
+        <div class="bg-slate-100 p-1.5 rounded-2xl flex items-center text-sm font-bold border border-slate-200">
+          <button id="btnModeSlide" onclick="switchViewMode('slide')" class="flex items-center space-x-2 px-3.5 py-1.5 rounded-xl bg-white text-brand-navy shadow-sm transition">
+            <i data-lucide="presentation" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">簡報模式</span>
+          </button>
+          <button id="btnModeDoc" onclick="switchViewMode('doc')" class="flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-slate-600 hover:text-brand-navy transition">
+            <i data-lucide="scroll-text" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">全篇滾動</span>
+          </button>
+        </div>
+
+        <!-- TOC Quick jump dropdown -->
+        <div class="relative">
+          <button onclick="toggleTocMenu()" class="p-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-2 border-brand-border bg-white text-brand-navy hover:bg-slate-50 transition flex items-center space-x-2 text-sm sm:text-base font-bold shadow-sm">
+            <i data-lucide="list-ordered" class="w-5 h-5"></i>
+            <span class="hidden md:inline">單元目錄</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 opacity-60"></i>
+          </button>
+
+          <!-- TOC Menu Popup -->
+          <div id="tocMenu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-3xl shadow-floating border border-brand-border py-3 z-50">
+            <div class="px-5 py-2 text-xs font-black text-slate-400 border-b border-slate-100 uppercase tracking-wider">切換簡報章節</div>
+            <div class="max-h-96 overflow-y-auto divide-y divide-slate-50" id="tocList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Fullscreen Button -->
+        <button onclick="toggleFullScreen()" title="全螢幕" class="p-2.5 rounded-2xl border border-brand-border bg-white text-slate-600 hover:text-brand-navy hover:bg-slate-50 transition shadow-sm">
+          <i data-lucide="maximize" class="w-5 h-5"></i>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8">
+
+    <!-- ================= 1. SLIDE PRESENTATION VIEW ================= -->
+    <div id="slideViewContainer" class="flex flex-col items-center">
+      
+      <!-- Slide Stage Area -->
+      <div class="w-full relative bg-white rounded-3xl border-2 border-brand-border shadow-card overflow-hidden slide-stage flex flex-col justify-between p-6 sm:p-10 lg:p-12">
+        
+        <!-- Top Status (Clean & Minimalist: Only Slide Number on top right) -->
+        <div class="flex items-center justify-end w-full text-base sm:text-lg font-bold text-slate-400 mb-2">
+          <span id="slideCounter">1 / 10</span>
+        </div>
+
+        <!-- Dynamic Slide Content Body -->
+        <div id="slideBody" class="flex-1 flex flex-col justify-center overflow-y-auto py-2">
+          <!-- Slide HTML rendered here -->
+        </div>
+
+        <!-- Bottom Navigation Controls Bar -->
+        <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between w-full">
+          <div class="flex items-center space-x-3">
+            <button onclick="prevSlide()" class="px-5 py-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-100 text-brand-navy font-black text-base transition flex items-center space-x-2 shadow-sm">
+              <i data-lucide="chevron-left" class="w-5 h-5"></i>
+              <span>上一頁</span>
+            </button>
+            <button onclick="nextSlide()" class="px-6 py-3 rounded-2xl bg-brand-navy hover:bg-brand-navyDark text-white font-black text-base transition flex items-center space-x-2 shadow-sm">
+              <span>下一頁</span>
+              <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <!-- Slide Dots Indicator -->
+          <div id="slideDots" class="flex items-center space-x-2 overflow-x-auto py-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Slide Thumbnail Strip (Below Presentation) -->
+      <div class="w-full mt-8">
+        <div class="flex items-center justify-between mb-4 px-1">
+          <h3 class="text-sm font-black text-slate-500 uppercase tracking-wider flex items-center space-x-2">
+            <i data-lucide="layout-grid" class="w-4 h-4 text-brand-navy"></i>
+            <span>投影片快速縮圖總覽</span>
+          </h3>
+          <span class="text-xs sm:text-sm text-slate-400 font-medium">點擊任意縮圖直接跳轉</span>
+        </div>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-3" id="thumbnailGrid">
+          <!-- Thumbnails dynamically rendered -->
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ================= 2. DOCUMENT SCROLL VIEW ================= -->
+    <div id="docViewContainer" class="hidden space-y-12">
+      <!-- Full document mode rendered by JS -->
+    </div>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-white border-t border-brand-border py-8 px-4 mt-12 text-center text-sm text-slate-600">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <span class="font-black text-brand-navy text-base">115學年度 國中輔導團到校諮詢</span>
+        <span>•</span>
+        <span class="font-bold">正興國中</span>
+        <span>•</span>
+        <span class="text-brand-orange font-bold">分享者：兼任輔導員 鄭汶瑜 (壽山國中)</span>
+      </div>
+      <div class="text-slate-400 text-xs sm:text-sm font-medium">
+        國文課 數位教學 ft. AI 工具 ｜ 響應式互動簡報系統
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= RESOURCE VIEWER MODAL (點擊連結後的展示與返回原頁面) ================= -->
+  <div id="resourceModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md hidden flex flex-col justify-between p-3 sm:p-6 lg:p-8 animate-fadeIn">
+    
+    <!-- Top Return Banner -->
+    <div class="max-w-6xl w-full mx-auto bg-brand-navy text-white px-6 py-4 rounded-3xl shadow-floating flex items-center justify-between gap-4">
+      <button onclick="closeResourceModal()" class="px-5 py-2.5 rounded-2xl bg-brand-orange hover:bg-brand-orangeDark text-white font-black text-base transition flex items-center space-x-2.5 shadow-md">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        <span id="modalReturnBtnText">← 返回簡報原頁面</span>
+      </button>
+
+      <div class="hidden md:flex flex-col text-center">
+        <span class="text-xs text-amber-300 font-bold uppercase tracking-wider">線上教學資源預覽導引</span>
+        <span id="modalResourceTitle" class="text-lg font-bold truncate max-w-md">外部教學工具</span>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <a id="modalExternalDirectLink" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm transition flex items-center space-x-2">
+          <span>在新分頁開啟</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+        <button onclick="closeResourceModal()" title="關閉" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Card -->
+    <div class="max-w-6xl w-full mx-auto flex-1 bg-white rounded-3xl shadow-2xl border-2 border-brand-border overflow-hidden my-4 p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-6">
+      <div class="w-20 h-20 rounded-3xl bg-blue-50 border-2 border-blue-100 flex items-center justify-center text-brand-navy mb-2 shadow-inner">
+        <i data-lucide="globe-2" class="w-10 h-10 text-brand-orange"></i>
+      </div>
+      
+      <div class="space-y-2 max-w-2xl">
+        <div class="text-sm font-bold text-brand-orange" id="modalResourceBadge">數位教學實作資源</div>
+        <h3 class="text-3xl sm:text-4xl font-black text-brand-navy" id="modalCardTitle">正在前往線上教學範例</h3>
+        <p class="text-base sm:text-lg text-slate-600 leading-relaxed" id="modalCardDesc">
+          為了提供最佳的操作體驗與隱私保護，該工具將於獨立安全分頁中開啟。
+        </p>
+      </div>
+
+      <!-- Action Button Area -->
+      <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+        <a id="modalMainOpenBtn" href="#" target="_blank" rel="noopener noreferrer" class="px-8 py-4 rounded-2xl bg-brand-navy hover:bg-brand-navyDark text-white font-black text-lg transition flex items-center space-x-3 shadow-lg hover:scale-105 transform duration-200">
+          <span>立刻開啟線上範例與工具</span>
+          <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+        </a>
+
+        <button onclick="closeResourceModal()" class="px-7 py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-base transition flex items-center space-x-2">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          <span>返回投影片</span>
+        </button>
+      </div>
+
+      <div class="text-xs sm:text-sm text-slate-400 pt-2 font-mono" id="modalUrlDisplay">https://...</div>
+    </div>
+
+    <!-- Bottom hint -->
+    <div class="text-center text-xs text-slate-400 py-1">
+      💡 完成操作後，切換回此分頁即可繼續研習簡報。
+    </div>
+  </div>
+
+
+  <!-- ================= IMAGE LIGHTBOX MODAL ================= -->
+  <div id="imageLightbox" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 cursor-pointer" onclick="closeLightbox()">
+    <div class="relative max-w-3xl max-h-[90vh] bg-white rounded-3xl p-6 shadow-2xl overflow-hidden text-center" onclick="event.stopPropagation()">
+      <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 w-11 h-11 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <img id="lightboxImg" src="" alt="放大檢視" class="max-h-[70vh] w-auto mx-auto rounded-2xl object-contain border border-slate-200 p-2">
+      <div id="lightboxCaption" class="text-base font-bold text-brand-navy pt-4"></div>
+      <button onclick="closeLightbox()" class="mt-4 px-6 py-2.5 rounded-xl bg-brand-navy text-white text-sm font-bold hover:bg-brand-navyDark transition">關閉放大視窗</button>
+    </div>
+  </div>
+
+  <!-- ================= COPY TOAST NOTIFICATION ================= -->
+  <div id="copyToast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 bg-brand-navy text-white px-6 py-3.5 rounded-2xl shadow-floating text-base font-bold flex items-center space-x-3 hidden">
+    <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400"></i>
+    <span id="toastMsg">已成功複製 Prompt 提示詞至剪貼簿！</span>
+  </div>
+
+
+  <!-- ================= SLIDES DATA & SCRIPT ================= -->
+  <script>
+    // Complete structured slides data (10 Slides)
+    const slidesData = [
+      // 1. Cover
+      {
+        id: 1,
+        title: "國文課 數位教學 ft. AI 工具",
+        subtitle: "20261005 到校諮詢在正興",
+        render: () => `
+          <div class="flex flex-col items-center justify-center text-center py-6 md:py-12 space-y-6 max-w-5xl mx-auto">
+            
+            <!-- Date Badge -->
+            <div class="inline-flex items-center space-x-2 px-5 py-2 rounded-full bg-orange-50 border-2 border-orange-200 text-brand-orange font-black text-base sm:text-lg shadow-xs">
+              <i data-lucide="calendar" class="w-5 h-5"></i>
+              <span>20261005 到校諮詢在正興</span>
+            </div>
+
+            <!-- Main Big Title -->
+            <h2 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-brand-navy tracking-tight leading-tight">
+              國文課 數位教學<br>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-navy via-brand-navyLight to-brand-orange">
+                ft. AI 工具
+              </span>
+            </h2>
+
+            <!-- Decorative Divider -->
+            <div class="w-24 h-2 bg-gradient-to-r from-brand-navy to-brand-orange rounded-full mx-auto my-2"></div>
+
+            <!-- Presenter Info -->
+            <p class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-700 pt-2">
+              分享者：兼任輔導員 壽山國中 <span class="text-brand-orange font-black text-2xl sm:text-3xl md:text-4xl ml-1">鄭汶瑜</span>
+            </p>
+
+            <!-- Topic Tags -->
+            <div class="pt-6 flex flex-wrap justify-center gap-3.5">
+              <span class="px-4 py-2 bg-slate-100 text-brand-navy text-sm sm:text-base font-bold rounded-xl border border-slate-200"># 文本教學三階段</span>
+              <span class="px-4 py-2 bg-slate-100 text-brand-navy text-sm sm:text-base font-bold rounded-xl border border-slate-200"># 寫作教學雙軌思考</span>
+              <span class="px-4 py-2 bg-slate-100 text-brand-navy text-sm sm:text-base font-bold rounded-xl border border-slate-200"># 黃金圈思維</span>
+              <span class="px-4 py-2 bg-slate-100 text-brand-navy text-sm sm:text-base font-bold rounded-xl border border-slate-200"># NotebookLM & Gemini Gem</span>
+            </div>
+          </div>
+        `
+      },
+
+      // 2. Golden Circle
+      {
+        id: 2,
+        title: "AI 融入教學的思考",
+        subtitle: "Why 目的 ➔ How 路徑 ➔ What 結果",
+        render: () => `
+          <div class="space-y-6">
+            <!-- Header Title -->
+            <div class="border-b border-slate-100 pb-3">
+              <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy">AI 融入教學的思考</h2>
+              <p class="text-base sm:text-xl text-slate-600 font-bold mt-1">先釐清為何而用，再規劃路徑，最終產出實質成果。</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
+              
+              <!-- Left: Interactive Golden Circle -->
+              <div class="lg:col-span-5 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-slate-50 to-blue-50/40 rounded-3xl border-2 border-slate-200 shadow-sm">
+                <div class="relative w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center">
+                  <!-- Outer: WHAT -->
+                  <div onclick="highlightGoldenCard('what')" class="circle-layer absolute w-72 h-72 sm:w-80 sm:h-80 rounded-full bg-slate-100 border-2 border-slate-300 flex flex-col items-center pt-3 shadow-xs" id="circle-what">
+                    <span class="text-sm font-black text-slate-600 uppercase tracking-wider">WHAT 產出結果</span>
+                  </div>
+
+                  <!-- Middle: HOW -->
+                  <div onclick="highlightGoldenCard('how')" class="circle-layer absolute w-52 h-52 sm:w-56 sm:h-56 rounded-full bg-blue-100/90 border-2 border-blue-300 flex flex-col items-center pt-3 shadow-sm" id="circle-how">
+                    <span class="text-sm font-black text-brand-navy uppercase tracking-wider">HOW 路徑方法</span>
+                  </div>
+
+                  <!-- Inner: WHY -->
+                  <div onclick="highlightGoldenCard('why')" class="circle-layer absolute w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-brand-navy border-2 border-brand-navyDark flex flex-col items-center justify-center text-white shadow-lg" id="circle-why">
+                    <span class="text-2xl font-black tracking-wide">WHY</span>
+                    <span class="text-xs font-bold text-amber-400">核心目的</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: 3 Cards (Font Enlarged) -->
+              <div class="lg:col-span-7 space-y-4">
+                <!-- Card 1: WHY -->
+                <div id="card-why" class="p-5 sm:p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card hover:shadow-card-hover transition-all duration-300">
+                  <div class="flex items-center space-x-3 mb-2.5">
+                    <span class="px-3 py-1 bg-brand-navy text-white text-sm font-black rounded-xl shadow-xs">WHY</span>
+                    <h3 class="text-xl sm:text-2xl font-black text-brand-orange">釐清教學與使用目的</h3>
+                  </div>
+                  <ul class="text-base sm:text-lg text-slate-700 font-medium space-y-2 pl-1">
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-navy shrink-0 mt-1"></i>
+                      <span>以學科本質與學生學習需求為核心，先問「為何而用」。</span>
+                    </li>
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-navy shrink-0 mt-1"></i>
+                      <span>聚焦解決課堂真實痛點，避免為科技而科技。</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Card 2: HOW -->
+                <div id="card-how" class="p-5 sm:p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card hover:shadow-card-hover transition-all duration-300">
+                  <div class="flex items-center space-x-3 mb-2.5">
+                    <span class="px-3 py-1 bg-blue-600 text-white text-sm font-black rounded-xl shadow-xs">HOW</span>
+                    <h3 class="text-xl sm:text-2xl font-black text-brand-orange">使用的路徑與方法</h3>
+                  </div>
+                  <ul class="text-base sm:text-lg text-slate-700 font-medium space-y-2 pl-1">
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-blue-600 shrink-0 mt-1"></i>
+                      <span>規劃清晰的教學流程、引導步驟與人機協作分工。</span>
+                    </li>
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-blue-600 shrink-0 mt-1"></i>
+                      <span>運用 AI 輔助備課、課堂即時引導與差異化分流。</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Card 3: WHAT -->
+                <div id="card-what" class="p-5 sm:p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card hover:shadow-card-hover transition-all duration-300">
+                  <div class="flex items-center space-x-3 mb-2.5">
+                    <span class="px-3 py-1 bg-slate-700 text-white text-sm font-black rounded-xl shadow-xs">WHAT</span>
+                    <h3 class="text-xl sm:text-2xl font-black text-brand-orange">想產出的結果</h3>
+                  </div>
+                  <ul class="text-base sm:text-lg text-slate-700 font-medium space-y-2 pl-1">
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-slate-700 shrink-0 mt-1"></i>
+                      <span>具體產出學習任務單、學生多元作品與評閱規準。</span>
+                    </li>
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-slate-700 shrink-0 mt-1"></i>
+                      <span>深化課堂互動與學習成效，培養深層語文素養。</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `
+      },
+
+      // 3. Text Teaching 3 Stages (Overview)
+      {
+        id: 3,
+        title: "一、 文本教學的三階段應用",
+        subtitle: "備課 ➔ 課堂 ➔ 課後 數位 AI 協作藍圖",
+        render: () => `
+          <div class="space-y-6">
+            <div class="border-b border-slate-100 pb-3">
+              <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy">一、 文本教學的三階段應用</h2>
+              <p class="text-base sm:text-xl text-slate-600 font-bold mt-1">串聯課前備課、課堂即時互動與課後多元回饋的全歷程架構。</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+              
+              <!-- Stage 1 -->
+              <div onclick="goToSlide(4)" class="p-7 rounded-3xl bg-white border-2 border-brand-border shadow-card hover:shadow-card-hover hover:border-brand-navy transition cursor-pointer flex flex-col justify-between group">
+                <div>
+                  <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-black text-brand-orange uppercase tracking-wider px-3 py-1 bg-orange-50 rounded-full border border-orange-200">STAGE 01</span>
+                    <div class="w-10 h-10 rounded-2xl bg-blue-50 text-brand-navy flex items-center justify-center group-hover:bg-brand-navy group-hover:text-white transition">
+                      <i data-lucide="book-marked" class="w-5 h-5"></i>
+                    </div>
+                  </div>
+                  
+                  <h3 class="text-2xl sm:text-3xl font-black text-brand-navy group-hover:text-brand-orange transition">1. 備課階段</h3>
+                  <div class="text-lg sm:text-xl font-bold text-brand-orange mt-1">AI 協作支援</div>
+                  <p class="text-base sm:text-lg text-slate-600 mt-4 leading-relaxed font-medium">
+                    快速梳理教材、生成學習任務單，大幅減輕教師前置準備負擔。
+                  </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-sm sm:text-base font-bold text-brand-navy">
+                  <span>查看備課實作詳解</span>
+                  <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1.5 transition"></i>
+                </div>
+              </div>
+
+              <!-- Stage 2 -->
+              <div onclick="goToSlide(5)" class="p-7 rounded-3xl bg-white border-2 border-brand-border shadow-card hover:shadow-card-hover hover:border-brand-navy transition cursor-pointer flex flex-col justify-between group">
+                <div>
+                  <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-black text-brand-orange uppercase tracking-wider px-3 py-1 bg-orange-50 rounded-full border border-orange-200">STAGE 02</span>
+                    <div class="w-10 h-10 rounded-2xl bg-orange-50 text-brand-orange flex items-center justify-center group-hover:bg-brand-orange group-hover:text-white transition">
+                      <i data-lucide="messages-square" class="w-5 h-5"></i>
+                    </div>
+                  </div>
+
+                  <h3 class="text-2xl sm:text-3xl font-black text-brand-navy group-hover:text-brand-orange transition">2. 課程進行</h3>
+                  <div class="text-lg sm:text-xl font-bold text-brand-orange mt-1">即時互動與分流</div>
+                  <ul class="text-base sm:text-lg text-slate-600 mt-4 space-y-2.5 leading-relaxed font-medium">
+                    <li class="flex items-start space-x-2">
+                      <span class="text-brand-orange font-black">•</span>
+                      <span>形成性評量掌握全班理解度與節奏</span>
+                    </li>
+                    <li class="flex items-start space-x-2">
+                      <span class="text-brand-orange font-black">•</span>
+                      <span>依程度線上分流，落實差異化教學</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-sm sm:text-base font-bold text-brand-navy">
+                  <span>查看課堂管道與平台</span>
+                  <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1.5 transition"></i>
+                </div>
+              </div>
+
+              <!-- Stage 3 -->
+              <div onclick="goToSlide(6)" class="p-7 rounded-3xl bg-white border-2 border-brand-border shadow-card hover:shadow-card-hover hover:border-brand-navy transition cursor-pointer flex flex-col justify-between group">
+                <div>
+                  <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-black text-brand-orange uppercase tracking-wider px-3 py-1 bg-orange-50 rounded-full border border-orange-200">STAGE 03</span>
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-700 group-hover:text-white transition">
+                      <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                    </div>
+                  </div>
+
+                  <h3 class="text-2xl sm:text-3xl font-black text-brand-navy group-hover:text-brand-orange transition">3. 課後階段</h3>
+                  <div class="text-lg sm:text-xl font-bold text-brand-orange mt-1">數位回饋與批閱</div>
+                  <p class="text-base sm:text-lg text-slate-600 mt-4 leading-relaxed font-medium">
+                    優化作業收發與評分流程，提升回饋效率與精準度，提供個別化學習建議。
+                  </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-sm sm:text-base font-bold text-brand-navy">
+                  <span>查看課後批閱流程</span>
+                  <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1.5 transition"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `
+      },
+
+      // 4. Stage 1 Detail: Lesson Prep
+      {
+        id: 4,
+        title: "1. 備課階段 ｜ AI 協作支援實作",
+        subtitle: "Gemini Notebook (NotebookLM) 應用實務",
+        render: () => `
+          <div class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy">1. 備課階段：AI 協作支援</h2>
+              </div>
+              <span class="px-4 py-1.5 bg-brand-navy/10 text-brand-navy rounded-2xl text-sm sm:text-base font-bold w-fit">工具：Gemini Notebook</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-2">
+              
+              <!-- Left: Steps -->
+              <div class="lg:col-span-7 space-y-4">
+                
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-2">
+                  <h3 class="text-xl sm:text-2xl font-black text-brand-navy flex items-center space-x-3">
+                    <span class="w-8 h-8 rounded-xl bg-brand-navy text-white text-sm flex items-center justify-center font-bold">1</span>
+                    <span>第一步：上傳資料</span>
+                  </h3>
+                  <p class="text-base sm:text-lg text-slate-700 pl-11 font-medium leading-relaxed">
+                    將課本選文、補充教材、教師手冊或教案 PDF/文件直接上傳至 NotebookLM 作為來源資料庫。
+                  </p>
+                </div>
+
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-3">
+                  <h3 class="text-xl sm:text-2xl font-black text-brand-navy flex items-center space-x-3">
+                    <span class="w-8 h-8 rounded-xl bg-brand-navy text-white text-sm flex items-center justify-center font-bold">2</span>
+                    <span>第二步：「設定對話」— 給 AI 身分說明與工作規範</span>
+                  </h3>
+                  <div class="pl-11">
+                    <div class="p-4 bg-amber-50/90 rounded-2xl border border-amber-200 text-sm sm:text-base text-amber-950 font-bold leading-relaxed">
+                      💡 <strong>撇步：善用「問問 Gemini」</strong>，先明確定義語文教學年段、目標學生程度與評量導向。
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-2">
+                  <h3 class="text-xl sm:text-2xl font-black text-brand-navy flex items-center space-x-3">
+                    <span class="w-8 h-8 rounded-xl bg-brand-navy text-white text-sm flex items-center justify-center font-bold">3</span>
+                    <span>第三步：根據需求給予任務</span>
+                  </h3>
+                  <p class="text-base sm:text-lg text-slate-700 pl-11 font-medium leading-relaxed">
+                    快速產出多層次提問、學習任務單、閱讀測驗題組、素養導向評量等。
+                  </p>
+                </div>
+
+              </div>
+
+              <!-- Right: Links & QR Image -->
+              <div class="lg:col-span-5 space-y-5">
+                
+                <!-- Open Links Card (Enhanced with Return Navigation) -->
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-4">
+                  <div class="flex items-center space-x-2 text-brand-orange font-black text-base sm:text-lg">
+                    <i data-lucide="external-link" class="w-5 h-5"></i>
+                    <span>實作範例線上連結</span>
+                  </div>
+
+                  <!-- Primary Button with Resource Modal & Direct Links -->
+                  <button onclick="openResourceModal('https://notebook.google.com/notebook/a76120fb-66c7-4653-9d7f-221310481ccf', 'Gemini Notebook 備課範例', '上傳選文與設定身分規範後的備課實作環境', 4)" class="w-full flex items-center justify-between p-4 rounded-2xl bg-blue-50/80 hover:bg-blue-100 border-2 border-blue-200 text-brand-navy font-black text-base sm:text-lg transition group shadow-xs text-left">
+                    <div class="flex items-center space-x-3 truncate">
+                      <i data-lucide="book-open" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                      <span class="truncate">開啟 NotebookLM 備課範例</span>
+                    </div>
+                    <i data-lucide="arrow-up-right" class="w-5 h-5 text-blue-600 group-hover:translate-x-1 group-hover:-translate-y-1 transition shrink-0"></i>
+                  </button>
+
+                  <button onclick="openResourceModal('https://reurl.cc/QNxWQZ', '備課短網址快速連結', '正興國中到校諮詢備課範例短網址', 4)" class="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 text-slate-800 font-bold text-base transition group text-left">
+                    <div class="flex items-center space-x-3 truncate">
+                      <i data-lucide="link" class="w-5 h-5 text-slate-500 shrink-0"></i>
+                      <span class="truncate">短網址 (reurl.cc/QNxWQZ)</span>
+                    </div>
+                    <i data-lucide="arrow-up-right" class="w-5 h-5 text-slate-500 group-hover:translate-x-1 group-hover:-translate-y-1 transition shrink-0"></i>
+                  </button>
+                </div>
+
+                <!-- QR Code Box -->
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card flex flex-col items-center text-center">
+                  <div class="cursor-pointer group relative" onclick="openLightbox('assets/slide_4_圖片_7.png', 'Gemini Notebook 實作範例 QR Code')">
+                    <img src="assets/slide_4_圖片_7.png" alt="QR Code" class="w-44 h-44 object-contain rounded-2xl border border-slate-100 p-1 group-hover:scale-105 transition duration-200">
+                    <div class="absolute inset-0 bg-brand-navy/20 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-sm font-bold">
+                      <i data-lucide="zoom-in" class="w-6 h-6"></i>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        `
+      },
+
+      // 5. Stage 2 Detail: In-Class
+      {
+        id: 5,
+        title: "2. 課程進行 ｜ 即時互動與分流",
+        subtitle: "思考可見、即時反饋與數位執行管道",
+        render: () => `
+          <div class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy">2. 課程進行：即時互動與分流</h2>
+              </div>
+              <span class="px-4 py-1.5 bg-brand-orange/10 text-brand-orange rounded-2xl text-sm sm:text-base font-bold w-fit">落實差異化教學</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-2">
+              
+              <!-- Left: Two Core Mechanism Cards -->
+              <div class="lg:col-span-6 space-y-4">
+                
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card">
+                  <div class="flex items-center space-x-3.5 mb-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-brand-navy text-white flex items-center justify-center font-bold">
+                      <i data-lucide="activity" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-black text-brand-navy">繳交機制</h3>
+                  </div>
+                  <p class="text-base sm:text-lg text-slate-700 pl-13 font-medium leading-relaxed">
+                    透過數位平台即時收整，掌握全班學習節奏與作答狀況。
+                  </p>
+                </div>
+
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card">
+                  <div class="flex items-center space-x-3.5 mb-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-brand-orange text-white flex items-center justify-center font-bold">
+                      <i data-lucide="eye" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-black text-brand-navy">即時展現</h3>
+                  </div>
+                  <p class="text-base sm:text-lg text-slate-700 pl-13 font-medium leading-relaxed">
+                    讓學生的思考與文本理解歷程可見，教師能立即 debug 與精準提問。
+                  </p>
+                </div>
+
+                <!-- Execution channels comparison -->
+                <div class="p-6 rounded-3xl bg-slate-50 border-2 border-slate-200 space-y-3">
+                  <h4 class="text-sm font-black text-slate-600 uppercase tracking-wider">執行管道多元評估</h4>
+                  <div class="space-y-2.5">
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 text-sm sm:text-base">
+                      <span class="font-bold text-brand-navy">1. AirDrop</span>
+                      <span class="px-3 py-1 bg-emerald-100 text-emerald-900 rounded-xl font-bold">門檻最低</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 text-sm sm:text-base">
+                      <span class="font-bold text-brand-navy">2. LoiLoNote</span>
+                      <span class="px-3 py-1 bg-blue-100 text-blue-900 rounded-xl font-bold">現有成熟平台</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200 text-sm sm:text-base">
+                      <span class="font-bold text-brand-navy">3. 運用 AI 工具自製</span>
+                      <span class="px-3 py-1 bg-amber-100 text-amber-900 rounded-xl font-bold">客製化但耗費心力</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Right: Links & QR Image -->
+              <div class="lg:col-span-6 space-y-5">
+                
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-4">
+                  <div class="flex items-center space-x-2 text-brand-orange font-black text-base sm:text-lg">
+                    <i data-lucide="external-link" class="w-5 h-5"></i>
+                    <span>課堂互動實作範例</span>
+                  </div>
+
+                  <button onclick="openResourceModal('https://reurl.cc/AXYA8e', '課堂互動實作範例', '即時互動與差異化分流課堂實例', 5)" class="w-full flex items-center justify-between p-4 rounded-2xl bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 text-brand-orangeDark font-black text-base sm:text-lg transition group text-left">
+                    <div class="flex items-center space-x-3 truncate">
+                      <i data-lucide="play-circle" class="w-5 h-5 text-brand-orange shrink-0"></i>
+                      <span class="truncate">開啟課堂互動範例 (reurl.cc/AXYA8e)</span>
+                    </div>
+                    <i data-lucide="arrow-up-right" class="w-5 h-5 text-brand-orange group-hover:translate-x-1 group-hover:-translate-y-1 transition shrink-0"></i>
+                  </button>
+                </div>
+
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card flex flex-col items-center text-center">
+                  <div class="cursor-pointer group relative" onclick="openLightbox('assets/slide_5_圖片_8.png', '課堂互動範例 QR Code')">
+                    <img src="assets/slide_5_圖片_8.png" alt="QR Code" class="w-48 h-48 object-contain rounded-2xl border border-slate-100 p-1 group-hover:scale-105 transition duration-200">
+                    <div class="absolute inset-0 bg-brand-navy/20 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-sm font-bold">
+                      <i data-lucide="zoom-in" class="w-6 h-6"></i>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        `
+      },
+
+      // 6. Stage 3 Detail: Post-Class
+      {
+        id: 6,
+        title: "3. 課後階段 ｜ 數位回饋與批閱",
+        subtitle: "試題分析、客製化評語與學習建議",
+        render: () => `
+          <div class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy">3. 課後階段：數位回饋與批閱</h2>
+              </div>
+              <span class="px-4 py-1.5 bg-brand-navy/10 text-brand-navy rounded-2xl text-sm sm:text-base font-bold w-fit">工具：Gemini Notebook</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch pt-2">
+              
+              <!-- Left: Flow Card -->
+              <div class="p-7 rounded-3xl bg-white border-2 border-brand-border shadow-card flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center space-x-3.5 mb-5">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-navy text-white flex items-center justify-center font-bold shadow-md">
+                      <i data-lucide="git-commit" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-xl sm:text-2xl font-black text-brand-navy">批閱四步驟標準工作流</h3>
+                      <span class="text-sm text-slate-500 font-bold">試題分析、作業批閱標準化</span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-4 relative pl-7 border-l-2 border-slate-200 ml-5 my-6">
+                    <div class="relative">
+                      <div class="absolute -left-[35px] top-1.5 w-4 h-4 rounded-full bg-brand-navy border-2 border-white"></div>
+                      <span class="font-black text-base sm:text-lg text-brand-navy">1. 給規準 / 正解</span>
+                      <p class="text-sm sm:text-base text-slate-600 font-medium mt-0.5">提供標準答案、評分規準與教學核心目標</p>
+                    </div>
+                    <div class="relative pt-2">
+                      <div class="absolute -left-[35px] top-3.5 w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
+                      <span class="font-black text-base sm:text-lg text-brand-navy">2. 上傳學生成果</span>
+                      <p class="text-sm sm:text-base text-slate-600 font-medium mt-0.5">將學生作業文字或影像成果匯入筆記</p>
+                    </div>
+                    <div class="relative pt-2">
+                      <div class="absolute -left-[35px] top-3.5 w-4 h-4 rounded-full bg-brand-orange border-2 border-white"></div>
+                      <span class="font-black text-base sm:text-lg text-brand-navy">3. 執行 Prompt 提示詞</span>
+                      <p class="text-sm sm:text-base text-slate-600 font-medium mt-0.5">依設定規準批閱，給予向度評分與質性評語</p>
+                    </div>
+                    <div class="relative pt-2">
+                      <div class="absolute -left-[35px] top-3.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white"></div>
+                      <span class="font-black text-base sm:text-lg text-brand-navy">4. 檢視與微調</span>
+                      <p class="text-sm sm:text-base text-slate-600 font-medium mt-0.5">教師把關複審，確保回饋溫暖且精準</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-4 sm:p-5 bg-emerald-50 rounded-2xl border-2 border-emerald-200 flex items-center space-x-3.5 mt-4">
+                  <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600 shrink-0"></i>
+                  <span class="text-sm sm:text-base font-black text-emerald-950">核心優勢：針對個別學生給予具體、即時的學習改善建議</span>
+                </div>
+              </div>
+
+              <!-- Right: Comparison & Summary -->
+              <div class="p-7 rounded-3xl bg-slate-50 border-2 border-slate-200 flex flex-col justify-between space-y-5">
+                <div>
+                  <h3 class="text-xl sm:text-2xl font-black text-brand-navy mb-4">傳統批閱 vs. AI 協同批閱</h3>
+                  <div class="space-y-4">
+                    <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-1.5 shadow-xs">
+                      <div class="font-black text-slate-500 text-sm sm:text-base">傳統批閱痛點</div>
+                      <div class="text-slate-700 text-base sm:text-lg font-medium leading-relaxed">耗費龐大時間、評語容易簡略或制式化、難以全面照顧個別差異。</div>
+                    </div>
+                    <div class="p-5 bg-white rounded-2xl border-2 border-blue-200 bg-blue-50/40 space-y-1.5 shadow-xs">
+                      <div class="font-black text-brand-navy text-sm sm:text-base">AI 協同批閱優勢</div>
+                      <div class="text-slate-800 text-base sm:text-lg font-bold leading-relaxed">快速抓出學生迷思概念、生成分向度評量、保留教師專業精力於高層次輔導與對話。</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200 text-sm sm:text-base text-slate-600 font-bold">
+                  可結合國中會考寫作測驗規準，打造專屬班級之寫作評閱助理。
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `
+      },
+
+      // 7. Writing Teaching Dual-Track (Overview)
+      {
+        id: 7,
+        title: "二、 寫作教學的雙軌思考",
+        subtitle: "方向一：教材與 AI 協同評閱 ｜ 方向二：歷程設計與教材開發",
+        render: () => `
+          <div class="space-y-6">
+            <div class="border-b border-slate-100 pb-3">
+              <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy">二、 寫作教學的雙軌思考</h2>
+              <p class="text-base sm:text-xl text-slate-600 font-bold mt-1">兼顧「會考評分規準」與「客製化校本學習歷程」的雙向實踐。</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+              
+              <!-- Track 1 -->
+              <div onclick="goToSlide(8)" class="p-8 rounded-3xl bg-white border-2 border-brand-border shadow-card hover:shadow-card-hover hover:border-brand-navy transition cursor-pointer flex flex-col justify-between group">
+                <div>
+                  <div class="inline-block px-4 py-1.5 bg-brand-navy text-white text-sm font-black rounded-xl mb-4 shadow-xs">
+                    方向一
+                  </div>
+                  <h3 class="text-2xl sm:text-3xl font-black text-brand-navy group-hover:text-brand-orange transition">教材與 AI 協同評閱</h3>
+                  <div class="text-lg sm:text-xl font-bold text-brand-orange mt-1">結合現有教材與會考規準</div>
+                  
+                  <ul class="text-base sm:text-lg text-slate-700 mt-6 space-y-3 font-medium">
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-navy shrink-0 mt-1"></i>
+                      <span class="font-black text-slate-900">現有教材 ＋ 會考規準 ＝ 當次規準</span>
+                    </li>
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-navy shrink-0 mt-1"></i>
+                      <span>AI 輔助教師進行引導、批閱與即時回饋。</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-base font-black text-brand-navy">
+                  <span>查看寫作引導與評閱 Prompt</span>
+                  <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1.5 transition"></i>
+                </div>
+              </div>
+
+              <!-- Track 2 -->
+              <div onclick="goToSlide(9)" class="p-8 rounded-3xl bg-white border-2 border-brand-border shadow-card hover:shadow-card-hover hover:border-brand-navy transition cursor-pointer flex flex-col justify-between group">
+                <div>
+                  <div class="inline-block px-4 py-1.5 bg-brand-orange text-white text-sm font-black rounded-xl mb-4 shadow-xs">
+                    方向二
+                  </div>
+                  <h3 class="text-2xl sm:text-3xl font-black text-brand-navy group-hover:text-brand-orange transition">歷程設計與教材開發</h3>
+                  <div class="text-lg sm:text-xl font-bold text-brand-orange mt-1">扣合寫作學習歷程規劃</div>
+                  
+                  <ul class="text-base sm:text-lg text-slate-700 mt-6 space-y-3 font-medium">
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-orange shrink-0 mt-1"></i>
+                      <span class="font-black text-slate-900">“我”想要的路徑</span>
+                    </li>
+                    <li class="flex items-start space-x-2.5">
+                      <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-orange shrink-0 mt-1"></i>
+                      <span>AI 協助教師規畫教學、發展客製化教學材料。</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-base font-black text-brand-navy">
+                  <span>查看校本跨域課程與 Gemini Gem</span>
+                  <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1.5 transition"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `
+      },
+
+      // 8. Writing Track 1: Prompts for Guidance & Assessment
+      {
+        id: 8,
+        title: "方向一：教材與 AI 協同評閱 ｜ 實用 Prompt",
+        subtitle: "寫作引導三階段 ＆ 會考規準評閱提示詞",
+        render: () => `
+          <div class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy">方向一：教材與 AI 協同評閱</h2>
+              </div>
+              <span class="px-4 py-1.5 bg-blue-50 text-blue-800 rounded-2xl text-sm sm:text-base font-black w-fit">現有教材 ＋ 會考規準 ＝ 當次規準</span>
+            </div>
+
+            <div class="space-y-6 pt-2">
+              
+              <!-- Prompt Box 1: 寫作引導 -->
+              <div class="p-6 sm:p-7 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+                    <h3 class="text-lg sm:text-xl font-black text-brand-navy">寫作引導 Prompt（立意取材 ➔ 結構組織 ➔ 書寫實踐）</h3>
+                  </div>
+                  <button onclick="copyPromptText('promptGuidance')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-brand-navy hover:text-white text-slate-800 font-bold text-sm transition flex items-center space-x-2 shadow-xs">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span>複製提示詞</span>
+                  </button>
+                </div>
+
+                <div id="promptGuidance" class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm sm:text-base text-slate-800 font-mono leading-relaxed whitespace-pre-wrap selection:bg-blue-200">請擔任國中寫作教學專家。請協助我分析【請在此填入作文題目】，並為國中七年級學生設計一套引導方案，包含以下三個階段：
+1. 立意取材引導：提供 3 個不同切入角度（如：生活經驗、社會現象、情感連結），並列出啟發性提問幫助學生發想。
+2. 結構組織規畫：設計一場結構大綱（如起承轉合或三段式），明確指出各段落的核心任務與字數建議。
+3. 書寫實踐鷹架：提供開頭示範句型或關鍵詞彙，降低學生的寫作焦慮。</div>
+              </div>
+
+              <!-- Prompt Box 2: 評閱規準與批閱 -->
+              <div class="p-6 sm:p-7 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <span class="w-3 h-3 rounded-full bg-brand-orange"></span>
+                    <h3 class="text-lg sm:text-xl font-black text-brand-navy">評閱與回饋 Prompt（規準生成 ＆ 學生作品批閱）</h3>
+                  </div>
+                  <button onclick="copyPromptText('promptRubric')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-brand-navy hover:text-white text-slate-800 font-bold text-sm transition flex items-center space-x-2 shadow-xs">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span>複製提示詞</span>
+                  </button>
+                </div>
+
+                <div id="promptRubric" class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm sm:text-base text-slate-800 font-mono leading-relaxed whitespace-pre-wrap selection:bg-orange-200">【規準生成】：根據會考寫作測驗評分規準，撰寫「114-2-1一年級國文科寫作測驗的評分規準」。
+
+【作品評閱】：根據規準評閱學生的作品：
+1. 評出級分
+2. 回應學生展露的情感或疑惑
+3. 根據評分規準的每一向度給予具體建議</div>
+              </div>
+
+            </div>
+          </div>
+        `
+      },
+
+      // 9. Writing Track 2: Curriculum Design & Gemini-Gem
+      {
+        id: 9,
+        title: "方向二：歷程設計與教材開發 ｜ 校本跨域課程",
+        subtitle: "Gemini-Gem 專屬助理 ＆ 兩年貫穿寫作課程發展",
+        render: () => `
+          <div class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy">方向二：歷程設計與教材開發</h2>
+              </div>
+              <span class="px-4 py-1.5 bg-brand-orange/10 text-brand-orange rounded-2xl text-sm sm:text-base font-black w-fit">“我”想要的路徑</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-2">
+              
+              <!-- Left: Links and Assistant Box -->
+              <div class="lg:col-span-5 space-y-5">
+                
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-4">
+                  <div class="flex items-center space-x-2.5 text-brand-navy font-black text-lg">
+                    <i data-lucide="bot" class="w-6 h-6 text-brand-orange"></i>
+                    <span>專屬工具：Gemini-Gem 教學助理</span>
+                  </div>
+
+                  <button onclick="openResourceModal('https://gemini.google.com/gem/16Xp1t14aa4k6PrQiwOZSsSfnbkuhhk94?usp=sharing', 'Gemini-Gem 寫作教學助理', '專屬國文科寫作教學與課程規劃 Gem 助理', 9)" class="w-full flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-2 border-blue-200 text-brand-navy font-black text-base sm:text-lg transition group shadow-xs text-left">
+                    <div class="flex items-center space-x-3 truncate">
+                      <i data-lucide="sparkles" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                      <span class="truncate">開啟 Gemini-Gem 專屬助理</span>
+                    </div>
+                    <i data-lucide="arrow-up-right" class="w-5 h-5 text-blue-600 group-hover:translate-x-1 group-hover:-translate-y-1 transition shrink-0"></i>
+                  </button>
+
+                  <button onclick="openResourceModal('https://reurl.cc/lnADvl', 'Gemini-Gem 短網址快速連結', '寫作教學專屬助理備用短網址', 9)" class="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 text-slate-800 font-bold text-base transition group text-left">
+                    <div class="flex items-center space-x-3 truncate">
+                      <i data-lucide="link" class="w-5 h-5 text-slate-500 shrink-0"></i>
+                      <span class="truncate">短網址 (reurl.cc/lnADvl)</span>
+                    </div>
+                    <i data-lucide="arrow-up-right" class="w-5 h-5 text-slate-500 group-hover:translate-x-1 group-hover:-translate-y-1 transition shrink-0"></i>
+                  </button>
+                </div>
+
+                <!-- QR Code Box -->
+                <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card flex flex-col items-center text-center">
+                  <div class="cursor-pointer group relative" onclick="openLightbox('assets/slide_9_Picture_2.png', 'Gemini-Gem 專屬助理 QR Code')">
+                    <img src="assets/slide_9_Picture_2.png" alt="Gemini-Gem QR Code" class="w-44 h-44 object-contain rounded-2xl border border-slate-100 p-1 group-hover:scale-105 transition duration-200">
+                    <div class="absolute inset-0 bg-brand-navy/20 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-sm font-bold">
+                      <i data-lucide="zoom-in" class="w-6 h-6"></i>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Right: Curriculum Prompt Example -->
+              <div class="lg:col-span-7 space-y-4">
+                
+                <div class="p-6 sm:p-7 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <span class="w-3 h-3 rounded-full bg-brand-orange"></span>
+                      <h3 class="text-lg sm:text-xl font-black text-brand-navy">範例：校本跨域寫作課程發展 Prompt</h3>
+                    </div>
+                    <button onclick="copyPromptText('promptCurriculum')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-brand-navy hover:text-white text-slate-800 font-bold text-sm transition flex items-center space-x-2 shadow-xs">
+                      <i data-lucide="copy" class="w-4 h-4"></i>
+                      <span>複製提示詞</span>
+                    </button>
+                  </div>
+
+                  <div id="promptCurriculum" class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm sm:text-base text-slate-800 font-mono leading-relaxed whitespace-pre-wrap selection:bg-amber-200">我想發展給 7、8 年級，共兩年的寫作課程，有階段有脈絡地學習記敘文(含與抒情文的結合)、說明文、議論文，各學期期末要有一個表現任務，總共 4 個。
+
+希望可以融入壽山國中與周遭地區(哈瑪星、鹽埕區等)自然與人文的主題。
+
+每學期的學習目標分開寫。</div>
+
+                  <div class="p-4 bg-blue-50/80 rounded-2xl border border-blue-200 text-sm sm:text-base text-brand-navy font-bold leading-relaxed">
+                    💡 <strong>應用心法</strong>：AI 協助教師規劃教學脈絡、發展客製化教學材料，扣合學校在地特色，打造教師「想要的路徑」。
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        `
+      },
+
+      // 10. Conclusion (全新新增第 10 頁)
+      {
+        id: 10,
+        title: "結語 ｜ 盡信 AI 不如無 AI",
+        subtitle: "不要放棄自己的專業",
+        render: () => `
+          <div class="flex flex-col items-center justify-center text-center py-6 md:py-10 max-w-5xl mx-auto space-y-8">
+            
+            <!-- Badge -->
+            <div class="inline-flex items-center space-x-2 px-5 py-2 rounded-full bg-brand-orange/10 border-2 border-brand-orange/30 text-brand-orange font-black text-base sm:text-lg">
+              <i data-lucide="flame" class="w-5 h-5"></i>
+              <span>研習總結 ｜ 教師的專業主體性</span>
+            </div>
+
+            <!-- Golden Rule Big Quote -->
+            <div class="relative px-6 py-8 sm:py-12 bg-gradient-to-br from-brand-navy via-brand-navyDark to-slate-900 rounded-3xl text-white shadow-card w-full overflow-hidden border-4 border-amber-400/30">
+              <div class="absolute -right-8 -bottom-8 opacity-10 text-white">
+                <i data-lucide="quote" class="w-48 h-48"></i>
+              </div>
+              
+              <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-amber-300 drop-shadow-sm">
+                「盡信 AI 不如無 AI，<br>
+                <span class="text-white">不要放棄自己的專業」</span>
+              </h2>
+
+              <div class="text-lg sm:text-2xl text-slate-200 font-bold mt-6 max-w-4xl mx-auto leading-relaxed space-y-1">
+                <p>AI 是強大的教學副駕駛，</p>
+                <p class="text-amber-200/90">但學科本質、專業引導與教育溫度，永遠來自教師本身。</p>
+              </div>
+            </div>
+
+            <!-- Three Pillars of Teacher's Value -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left pt-2">
+              <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-2">
+                <div class="w-10 h-10 rounded-2xl bg-orange-100 text-brand-orange flex items-center justify-center font-bold mb-3">
+                  <i data-lucide="feather" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-xl font-black text-brand-navy">文學敏銳與情感</h3>
+                <p class="text-base text-slate-600 font-medium leading-relaxed">
+                  AI 能梳理文章結構，但文字背後的生命共鳴、情意引導與心靈啟發，無法被演算法取代。
+                </p>
+              </div>
+
+              <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-2">
+                <div class="w-10 h-10 rounded-2xl bg-blue-100 text-brand-navy flex items-center justify-center font-bold mb-3">
+                  <i data-lucide="compass" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-xl font-black text-brand-navy">教學主導與規準</h3>
+                <p class="text-base text-slate-600 font-medium leading-relaxed">
+                  握緊教學方向盤，用教師的專業眼光審視、微調 AI 生成的材料，確保切合學生真實需求。
+                </p>
+              </div>
+
+              <div class="p-6 rounded-3xl bg-white border-2 border-brand-border shadow-card space-y-2">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold mb-3">
+                  <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-xl font-black text-brand-navy">真實陪伴與對話</h3>
+                <p class="text-base text-slate-600 font-medium leading-relaxed">
+                  省下繁瑣重複的時間，將更多精力和時間留給課堂上每一個活生生的孩子。
+                </p>
+              </div>
+            </div>
+
+          </div>
+        `
+      }
+    ];
+
+    // App State
+    let currentSlide = 1;
+    let currentViewMode = 'slide';
+
+    // Init function
+    document.addEventListener('DOMContentLoaded', () => {
+      buildTocMenu();
+      buildThumbnails();
+      renderSlide(currentSlide);
+      renderDocMode();
+      lucide.createIcons();
+
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        if (currentViewMode !== 'slide') return;
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          prevSlide();
+        }
+      });
+
+      // Touch swipe support for mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const stage = document.getElementById('slideViewContainer');
+      stage.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, false);
+      stage.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, false);
+
+      function handleSwipe() {
+        if (currentViewMode !== 'slide') return;
+        if (touchEndX < touchStartX - 50) {
+          nextSlide();
+        }
+        if (touchEndX > touchStartX + 50) {
+          prevSlide();
+        }
+      }
+    });
+
+    // Render single slide in presentation view
+    function renderSlide(slideId) {
+      const slide = slidesData.find(s => s.id === slideId);
+      if (!slide) return;
+      currentSlide = slideId;
+
+      const bodyEl = document.getElementById('slideBody');
+      bodyEl.innerHTML = slide.render();
+
+      document.getElementById('slideCounter').innerText = `${slide.id} / ${slidesData.length}`;
+
+      renderDots();
+      updateThumbnailActive();
+      lucide.createIcons();
+    }
+
+    // Render dots indicator
+    function renderDots() {
+      const dotsEl = document.getElementById('slideDots');
+      dotsEl.innerHTML = slidesData.map(s => `
+        <button onclick="goToSlide(${s.id})" title="第 ${s.id} 頁：${s.title}" class="h-2.5 rounded-full transition-all duration-300 ${s.id === currentSlide ? 'w-8 bg-brand-orange' : 'w-2.5 bg-slate-300 hover:bg-slate-400'}"></button>
+      `).join('');
+    }
+
+    // Slide Next / Prev / GoTo
+    function nextSlide() {
+      if (currentSlide < slidesData.length) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+    function prevSlide() {
+      if (currentSlide > 1) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+    function goToSlide(id) {
+      if (currentViewMode !== 'slide') {
+        switchViewMode('slide');
+      }
+      renderSlide(id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Thumbnails rendering
+    function buildThumbnails() {
+      const grid = document.getElementById('thumbnailGrid');
+      grid.innerHTML = slidesData.map(s => `
+        <button onclick="goToSlide(${s.id})" id="thumb-${s.id}" class="thumbnail-btn flex flex-col p-1.5 rounded-2xl bg-white border-2 border-slate-200 hover:border-brand-navy transition text-left group shadow-xs">
+          <div class="relative w-full aspect-video rounded-xl bg-slate-100 overflow-hidden mb-1 border border-slate-100 flex items-center justify-center">
+            <img src="assets/slide_${s.id}.png" alt="Slide ${s.id}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200" onerror="this.style.display='none'">
+            <span class="absolute top-1 left-1 px-2 py-0.5 bg-brand-navy/90 text-white rounded-lg text-xs font-black">${s.id}</span>
+          </div>
+          <span class="text-xs font-bold text-slate-800 truncate w-full group-hover:text-brand-navy">${s.title}</span>
+        </button>
+      `).join('');
+    }
+
+    function updateThumbnailActive() {
+      document.querySelectorAll('.thumbnail-btn').forEach(el => {
+        el.classList.remove('border-brand-orange', 'ring-2', 'ring-brand-orange/40');
+        el.classList.add('border-slate-200');
+      });
+      const activeThumb = document.getElementById(`thumb-${currentSlide}`);
+      if (activeThumb) {
+        activeThumb.classList.remove('border-slate-200');
+        activeThumb.classList.add('border-brand-orange', 'ring-2', 'ring-brand-orange/40');
+      }
+    }
+
+    // TOC Menu
+    function buildTocMenu() {
+      const list = document.getElementById('tocList');
+      list.innerHTML = slidesData.map(s => `
+        <button onclick="goToSlide(${s.id}); toggleTocMenu();" class="w-full text-left px-5 py-3 hover:bg-slate-50 transition flex items-center justify-between group">
+          <div class="flex items-center space-x-3 truncate">
+            <span class="w-6 h-6 rounded-lg bg-slate-100 group-hover:bg-brand-navy group-hover:text-white text-slate-700 text-xs font-black flex items-center justify-center transition shrink-0">${s.id}</span>
+            <div class="truncate">
+              <div class="text-sm font-black text-slate-800 truncate">${s.title}</div>
+              <div class="text-xs text-slate-500 truncate">${s.subtitle || ''}</div>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-brand-navy group-hover:translate-x-1 transition shrink-0"></i>
+        </button>
+      `).join('');
+    }
+
+    function toggleTocMenu() {
+      const menu = document.getElementById('tocMenu');
+      menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const toc = document.getElementById('tocMenu');
+      const btn = e.target.closest('button[onclick="toggleTocMenu()"]');
+      if (!btn && !toc.contains(e.target)) {
+        toc.classList.add('hidden');
+      }
+    });
+
+    // Render Document Scroll Mode
+    function renderDocMode() {
+      const doc = document.getElementById('docViewContainer');
+      doc.innerHTML = slidesData.map(s => `
+        <section id="doc-section-${s.id}" class="bg-white rounded-3xl border-2 border-brand-border p-6 sm:p-12 shadow-card">
+          <div class="flex items-center space-x-2 text-sm font-black text-brand-orange uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">
+            <span>投影片 第 ${s.id} 頁</span>
+          </div>
+          ${s.render()}
+        </section>
+      `).join('');
+    }
+
+    // Switch View Mode
+    function switchViewMode(mode) {
+      currentViewMode = mode;
+      const slideView = document.getElementById('slideViewContainer');
+      const docView = document.getElementById('docViewContainer');
+      const btnSlide = document.getElementById('btnModeSlide');
+      const btnDoc = document.getElementById('btnModeDoc');
+
+      if (mode === 'slide') {
+        slideView.classList.remove('hidden');
+        docView.classList.add('hidden');
+        btnSlide.classList.add('bg-white', 'text-brand-navy', 'shadow-sm');
+        btnSlide.classList.remove('text-slate-600');
+        btnDoc.classList.remove('bg-white', 'text-brand-navy', 'shadow-sm');
+        btnDoc.classList.add('text-slate-600');
+        renderSlide(currentSlide);
+      } else {
+        slideView.classList.add('hidden');
+        docView.classList.remove('hidden');
+        btnDoc.classList.add('bg-white', 'text-brand-navy', 'shadow-sm');
+        btnDoc.classList.remove('text-slate-600');
+        btnSlide.classList.remove('bg-white', 'text-brand-navy', 'shadow-sm');
+        btnSlide.classList.add('text-slate-600');
+        lucide.createIcons();
+      }
+    }
+
+    // Golden Circle Interactive highlight
+    function highlightGoldenCard(type) {
+      ['why', 'how', 'what'].forEach(k => {
+        const card = document.getElementById(`card-${k}`);
+        const circle = document.getElementById(`circle-${k}`);
+        if (card) {
+          card.classList.remove('ring-4', 'ring-brand-orange/40', 'scale-[1.02]');
+        }
+        if (circle) {
+          circle.classList.remove('active');
+        }
+      });
+
+      const targetCard = document.getElementById(`card-${type}`);
+      const targetCircle = document.getElementById(`circle-${type}`);
+      if (targetCard) {
+        targetCard.classList.add('ring-4', 'ring-brand-orange/40', 'scale-[1.02]');
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      if (targetCircle) {
+        targetCircle.classList.add('active');
+      }
+    }
+
+    // One-Click Copy Prompt
+    function copyPromptText(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      const text = el.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('已成功複製 Prompt 提示詞至剪貼簿！');
+      }).catch(() => {
+        showToast('複製失敗，請手動反白選取。');
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('copyToast');
+      const msgEl = document.getElementById('toastMsg');
+      msgEl.innerText = msg;
+      toast.classList.remove('hidden');
+      toast.classList.add('toast-show');
+
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('toast-show');
+      }, 2500);
+    }
+
+    // Resource Viewer Modal (點擊超連結時提供明確的返回原頁面指示與跳轉)
+    function openResourceModal(url, title, desc, sourceSlideId) {
+      const modal = document.getElementById('resourceModal');
+      document.getElementById('modalResourceTitle').innerText = title;
+      document.getElementById('modalCardTitle').innerText = title;
+      document.getElementById('modalCardDesc').innerText = desc || '點擊下方按鈕將於安全分頁開啟此教學工具與範例。';
+      document.getElementById('modalReturnBtnText').innerText = `← 返回簡報第 ${sourceSlideId} 頁`;
+      document.getElementById('modalExternalDirectLink').href = url;
+      document.getElementById('modalMainOpenBtn').href = url;
+      document.getElementById('modalUrlDisplay').innerText = url;
+      
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeResourceModal() {
+      document.getElementById('resourceModal').classList.add('hidden');
+    }
+
+    // Fullscreen Toggle
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.error(err);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Lightbox for QR code images
+    function openLightbox(imgSrc, caption) {
+      const lightbox = document.getElementById('imageLightbox');
+      const img = document.getElementById('lightboxImg');
+      const cap = document.getElementById('lightboxCaption');
+      img.src = imgSrc;
+      cap.innerText = caption;
+      lightbox.classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeLightbox() {
+      document.getElementById('imageLightbox').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
